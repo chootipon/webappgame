@@ -80,11 +80,6 @@ export default function PpeGame() {
 
  return (
   <div className={`min-h-screen flex flex-col items-center justify-start px-4 py-6 transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-green-200 to-blue-100 text-gray-800'}`}>
-    
-    {/* 🔈 เสียง */}
-    <audio ref={correctSoundRef} src="/sounds/correct.mp3" preload="auto" />
-    <audio ref={wrongSoundRef} src="/sounds/wrong.mp3" preload="auto" />
-    <audio ref={finishSoundRef} src="/sounds/finish.mp3" preload="auto" />
 
     {/* Header */}
     <div className="flex justify-between w-full max-w-md items-center mb-4">
