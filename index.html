@@ -2,40 +2,54 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>เกมอบรม PPE โรงงาน</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet" />
   
   <style>
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Kanit', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #fff;
       margin: 0;
-      padding: 20px;
+      padding: 20px 15px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       user-select: none;
+      overflow-x: hidden;
     }
 
     h1 {
       margin-bottom: 15px;
       text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
       font-weight: 700;
+      font-size: 2rem;
+      text-align: center;
+      animation: fadeInDown 0.8s ease forwards;
+    }
+
+    #score, #progress {
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-shadow: 0 0 5px rgba(0,0,0,0.3);
+      animation: fadeInUp 0.8s ease forwards;
+      text-align: center;
     }
 
     #score {
-      font-size: 1.3rem;
-      margin-bottom: 8px;
-      text-shadow: 0 0 5px rgba(0,0,0,0.3);
+      font-size: 1.4rem;
     }
+
     #progress {
-      margin-bottom: 12px;
-      font-weight: 600;
-      text-shadow: 0 0 5px rgba(0,0,0,0.3);
+      font-size: 1.2rem;
+      margin-bottom: 20px;
     }
 
     #questionBox {
@@ -44,8 +58,17 @@
       padding: 25px 30px;
       max-width: 450px;
       width: 100%;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
       animation: popIn 0.5s ease forwards;
+      position: relative;
+      overflow: hidden;
+      min-height: 230px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    #questionBox.loading {
+      opacity: 0.5;
+      pointer-events: none;
     }
 
     @keyframes popIn {
@@ -59,12 +82,47 @@
       }
     }
 
+    @keyframes fadeInDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .questionText {
-      font-weight: 600;
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-      min-height: 60px;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 22px;
+      min-height: 70px;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
+      line-height: 1.3;
+      animation: fadeInText 0.5s ease forwards;
+    }
+
+    @keyframes fadeInText {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
     .choiceBtn {
@@ -72,28 +130,33 @@
       overflow: hidden;
       display: block;
       width: 100%;
-      padding: 14px 0;
+      padding: 16px 0;
       margin: 10px 0;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: #fff;
       background: #6c63ff;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
-      box-shadow: 0 6px 12px rgba(108, 99, 255, 0.5);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 8px 18px rgba(108, 99, 255, 0.55);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
       user-select: none;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      animation: fadeInUp 0.6s ease forwards;
     }
 
     .choiceBtn:hover:not(:disabled) {
       background: #534eda;
-      box-shadow: 0 8px 20px rgba(83, 78, 218, 0.7);
+      box-shadow: 0 10px 26px rgba(83, 78, 218, 0.75);
+      transform: translateY(-3px);
     }
     .choiceBtn:disabled {
       cursor: not-allowed;
       background: #8a85ffaa;
       box-shadow: none;
       color: #ddd;
+      transform: none;
     }
 
     .choiceBtn::after {
@@ -118,58 +181,83 @@
 
     .choiceBtn.correct {
       background-color: #4caf50 !important;
-      box-shadow: 0 8px 20px rgba(76, 175, 80, 0.7) !important;
+      box-shadow: 0 10px 28px rgba(76, 175, 80, 0.85) !important;
       color: #fff !important;
+      transform: translateY(-3px);
     }
 
     #explanation {
       margin-top: 18px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       color: #dcdcdc;
-      min-height: 48px;
+      min-height: 54px;
       opacity: 0;
       transition: opacity 0.5s ease;
       user-select: text;
+      text-shadow: 0 0 6px rgba(0,0,0,0.3);
+      font-weight: 500;
+      line-height: 1.4;
+      animation: fadeInText 0.5s ease forwards;
     }
     #explanation.show {
       opacity: 1;
     }
 
     #nextBtn {
-      margin-top: 25px;
-      padding: 14px 0;
+      margin-top: 28px;
+      padding: 16px 0;
       width: 100%;
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1.15rem;
+      font-weight: 700;
       color: #3a2f63;
       background: #ffdd57;
       border: none;
-      border-radius: 14px;
+      border-radius: 16px;
       cursor: pointer;
-      box-shadow: 0 6px 16px rgba(255, 221, 87, 0.8);
-      transition: background-color 0.3s ease;
+      box-shadow: 0 8px 22px rgba(255, 221, 87, 0.9);
+      transition: background-color 0.3s ease, transform 0.2s ease;
       user-select: none;
       display: none;
+      animation: fadeInUp 0.6s ease forwards;
     }
 
     #nextBtn:hover {
       background: #f6c90e;
+      transform: translateY(-3px);
     }
 
+    /* Responsive for mobile */
     @media (max-width: 480px) {
       body {
-        padding: 15px 10px;
+        padding: 15px 12px;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+      #score {
+        font-size: 1.2rem;
+      }
+      #progress {
+        font-size: 1.1rem;
       }
       #questionBox {
-        padding: 20px 15px;
+        padding: 22px 18px;
+        min-height: 210px;
+      }
+      .questionText {
+        font-size: 1.15rem;
+        min-height: 65px;
       }
       .choiceBtn {
         font-size: 1rem;
-        padding: 12px 0;
+        padding: 14px 0;
+        border-radius: 12px;
+        margin: 8px 0;
       }
       #nextBtn {
         font-size: 1rem;
-        padding: 12px 0;
+        padding: 14px 0;
+        border-radius: 14px;
       }
     }
   </style>
@@ -203,6 +291,7 @@
   const scoreDiv = document.getElementById('score');
   const progressDiv = document.getElementById('progress');
   const nextBtn = document.getElementById('nextBtn');
+  const questionBox = document.getElementById('questionBox');
 
   function resetButtons() {
     [btnA, btnB, btnC].forEach(btn => {
@@ -212,6 +301,7 @@
       btn.style.backgroundColor = '#6c63ff';
       btn.style.boxShadow = '0 6px 12px rgba(108, 99, 255, 0.5)';
       btn.style.color = '#fff';
+      btn.style.transform = 'none';
     });
   }
 
@@ -289,7 +379,10 @@
     explanation.textContent = '';
     nextBtn.style.display = 'none';
 
+    questionBox.classList.add('loading');
+
     if (questionIndex >= TOTAL_QUESTIONS) {
+      questionBox.classList.remove('loading');
       showFinalScore();
       return;
     }
@@ -305,13 +398,16 @@
         .then(data => {
           questions = data;
           pickQuestion();
+          questionBox.classList.remove('loading');
         })
         .catch(err => {
           questionText.textContent = 'โหลดคำถามไม่สำเร็จ กรุณาลองใหม่';
+          questionBox.classList.remove('loading');
           console.error(err);
         });
     } else {
       pickQuestion();
+      questionBox.classList.remove('loading');
     }
 
     function pickQuestion() {
@@ -326,10 +422,15 @@
       questionIndex++;
       updateProgress();
 
-      questionText.textContent = `[${question.situation}] ${question.question}`;
-      btnA.textContent = 'A. ' + question.choiceA;
-      btnB.textContent = 'B. ' + question.choiceB;
-      btnC.textContent = 'C. ' + question.choiceC;
+      // Animate question text fade out/in
+      questionText.style.opacity = 0;
+      setTimeout(() => {
+        questionText.textContent = `[${question.situation}] ${question.question}`;
+        btnA.textContent = 'A. ' + question.choiceA;
+        btnB.textContent = 'B. ' + question.choiceB;
+        btnC.textContent = 'C. ' + question.choiceC;
+        questionText.style.opacity = 1;
+      }, 250);
     }
   }
 
