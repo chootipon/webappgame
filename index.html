@@ -1,18 +1,158 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html> 
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PPE Training Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
   <style>
-    /* (ตัด style เดิมมาได้เลย) */
+    /* Reset และตั้งค่าฟ้อนต์ */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: #f0f4ff;
+      color: #333;
+      margin: 0; padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    #questionBox {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      max-width: 480px;
+      width: 100%;
+      padding: 30px 40px 40px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #4a47a3;
+      margin-bottom: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 2rem;
+    }
+
+    #score, #progress {
+      font-weight: 600;
+      margin: 10px 0 20px;
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    .questionText {
+      font-size: 1.25rem;
+      margin-bottom: 30px;
+      min-height: 60px;
+      font-weight: 600;
+      color: #222;
+    }
+
+    .choiceBtn {
+      background-color: #6c63ff;
+      border: none;
+      color: white;
+      padding: 15px 25px;
+      margin: 10px 0;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 6px 12px rgba(108, 99, 255, 0.5);
+      user-select: none;
+    }
+
+    .choiceBtn:hover:not(:disabled) {
+      background-color: #594fcf;
+      box-shadow: 0 8px 18px rgba(89, 79, 207, 0.7);
+    }
+
+    .choiceBtn:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .choiceBtn.correct {
+      background-color: #28a745 !important;
+      box-shadow: 0 6px 12px rgba(40, 167, 69, 0.7);
+      color: white;
+    }
+
+    .ripple {
+      animation: rippleEffect 0.6s linear;
+    }
+    @keyframes rippleEffect {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255,255,255,0.7);
+      }
+      100% {
+        box-shadow: 0 0 20px 15px rgba(255,255,255,0);
+      }
+    }
+
+    #explanation {
+      margin-top: 25px;
+      font-size: 1rem;
+      color: #555;
+      min-height: 40px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #explanation.show {
+      opacity: 1;
+      color: #444;
+      font-weight: 600;
+    }
+
+    #nextBtn {
+      margin-top: 30px;
+      background-color: #ff6b6b;
+      border: none;
+      padding: 14px 40px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      display: none;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 6px 12px rgba(255, 107, 107, 0.6);
+      user-select: none;
+    }
+
+    #nextBtn:hover {
+      background-color: #e04e4e;
+      box-shadow: 0 8px 18px rgba(224, 78, 78, 0.8);
+    }
+
+    /* Responsive */
+    @media (max-width: 520px) {
+      #questionBox {
+        padding: 25px 20px 30px;
+      }
+      .choiceBtn {
+        padding: 14px 18px;
+        font-size: 1rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>เกมอบรม PPE โรงงาน</h1>
-  <div id="score">คะแนนรวม: 0</div>
-  <div id="progress">คำถามที่ 0 จาก 10</div>
   <div id="questionBox">
+    <h1>เกมอบรม PPE โรงงาน</h1>
+    <div id="score">คะแนนรวม: 0</div>
+    <div id="progress">คำถามที่ 0 จาก 10</div>
     <div class="questionText" id="questionText">กำลังโหลดคำถาม...</div>
     <button class="choiceBtn" id="btnA"></button>
     <button class="choiceBtn" id="btnB"></button>
@@ -22,156 +162,7 @@
   </div>
 
   <script>
-    const TOTAL_QUESTIONS = 10;
-    let currentQuestion = null;
-    let score = 0;
-    let questionIndex = 0;
-    let askedQuestions = new Set();
-    let questions = [];
-    let questionsLoaded = false;
-
-    const questionText = document.getElementById('questionText');
-    const btnA = document.getElementById('btnA');
-    const btnB = document.getElementById('btnB');
-    const btnC = document.getElementById('btnC');
-    const explanation = document.getElementById('explanation');
-    const scoreDiv = document.getElementById('score');
-    const progressDiv = document.getElementById('progress');
-    const nextBtn = document.getElementById('nextBtn');
-
-    function resetButtons() {
-      [btnA, btnB, btnC].forEach(btn => {
-        btn.disabled = false;
-        btn.classList.remove('correct');
-        btn.classList.remove('ripple');
-        btn.style.backgroundColor = '#6c63ff';
-        btn.style.boxShadow = '0 6px 12px rgba(108, 99, 255, 0.5)';
-        btn.style.color = '#fff';
-      });
-    }
-
-    function highlightCorrectAnswer() {
-      const correct = currentQuestion.correctAnswer.toUpperCase();
-      if (correct === 'A') btnA.classList.add('correct');
-      else if (correct === 'B') btnB.classList.add('correct');
-      else if (correct === 'C') btnC.classList.add('correct');
-    }
-
-    function updateProgress() {
-      progressDiv.textContent = `คำถามที่ ${questionIndex} จาก ${TOTAL_QUESTIONS}`;
-    }
-
-    function checkAnswer(choice) {
-      [btnA, btnB, btnC].forEach(btn => btn.disabled = true);
-
-      // Ripple effect
-      [btnA, btnB, btnC].forEach(btn => btn.classList.remove('ripple'));
-      const clickedBtn = choice === 'A' ? btnA : choice === 'B' ? btnB : btnC;
-      clickedBtn.classList.add('ripple');
-      setTimeout(() => clickedBtn.classList.remove('ripple'), 600);
-
-      const isCorrect = choice === currentQuestion.correctAnswer.toUpperCase();
-      if (isCorrect) {
-        score++;
-        scoreDiv.textContent = `คะแนนรวม: ${score}`;
-      }
-
-      explanation.textContent = (isCorrect ? 'ถูกต้อง! ' : 'ผิด! ') + currentQuestion.explanation;
-      explanation.classList.add('show');
-
-      highlightCorrectAnswer();
-      nextBtn.style.display = 'inline-block';
-    }
-
-    function showFinalScore() {
-      questionText.textContent = `จบเกม! คะแนนรวมของคุณคือ ${score} จาก ${TOTAL_QUESTIONS}`;
-      [btnA, btnB, btnC].forEach(btn => {
-        btn.style.display = 'none';
-      });
-      explanation.classList.remove('show');
-      explanation.textContent = '';
-
-      nextBtn.textContent = 'เล่นอีกครั้ง';
-      nextBtn.style.display = 'inline-block';
-
-      // บันทึก high score ใน localStorage
-      const highScore = localStorage.getItem('ppeHighScore') || 0;
-      if (score > highScore) {
-        localStorage.setItem('ppeHighScore', score);
-        explanation.textContent = '🎉 คะแนนสูงสุดใหม่! 🎉';
-      } else {
-        explanation.textContent = `คะแนนสูงสุด: ${highScore}`;
-      }
-      explanation.classList.add('show');
-
-      nextBtn.onclick = () => {
-        // รีเซ็ตเกม
-        score = 0;
-        scoreDiv.textContent = `คะแนนรวม: ${score}`;
-        questionIndex = 0;
-        askedQuestions.clear();
-        [btnA, btnB, btnC].forEach(btn => {
-          btn.style.display = 'block';
-        });
-        nextBtn.textContent = 'คำถามถัดไป';
-        nextBtn.style.display = 'none';
-        explanation.classList.remove('show');
-        explanation.textContent = '';
-        nextBtn.onclick = () => loadQuestion();
-        loadQuestion();
-      };
-    }
-
-    function loadQuestion() {
-      explanation.classList.remove('show');
-      explanation.textContent = '';
-      nextBtn.style.display = 'none';
-
-      if (!questionsLoaded) {
-        fetch('https://script.google.com/macros/s/AKfycbzCpJJNVOdsRVUtHAZjRbC59gvavFDDf8mQod2U5Mn2K_512W_p7Zzndn1y8GqB2LU0/exec')
-          .then(res => res.json())
-          .then(data => {
-            questions = data;
-            questionsLoaded = true;
-            loadQuestion();
-          })
-          .catch(err => {
-            questionText.textContent = 'ไม่สามารถโหลดคำถามได้ กรุณาลองใหม่อีกครั้ง';
-            console.error(err);
-          });
-        return;
-      }
-
-      if (questionIndex >= TOTAL_QUESTIONS) {
-        showFinalScore();
-        return;
-      }
-
-      resetButtons();
-
-      let question;
-      do {
-        const randomIndex = Math.floor(Math.random() * questions.length);
-        question = questions[randomIndex];
-      } while (askedQuestions.has(question.id));
-
-      askedQuestions.add(question.id);
-      currentQuestion = question;
-      questionIndex++;
-      updateProgress();
-
-      questionText.textContent = `[${question.situation}] ${question.question}`;
-      btnA.textContent = 'A. ' + question.choiceA;
-      btnB.textContent = 'B. ' + question.choiceB;
-      btnC.textContent = 'C. ' + question.choiceC;
-    }
-
-    btnA.onclick = () => checkAnswer('A');
-    btnB.onclick = () => checkAnswer('B');
-    btnC.onclick = () => checkAnswer('C');
-    nextBtn.onclick = () => loadQuestion();
-
-    window.onload = loadQuestion;
+    // โค้ด JS เหมือนเดิม ใช้ของคุณเลย
   </script>
 </body>
 </html>
