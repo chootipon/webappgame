@@ -78,122 +78,124 @@ export default function PpeGame() {
     setIsFinished(false);
   };
 
-  return (
-    <div className={`min-h-screen flex flex-col items-center justify-start px-4 py-6 transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-green-200 to-blue-100 text-gray-800'}`}>
-      {/* 🔈 เสียง */}
-      <audio ref={correctSoundRef} src="/sounds/correct.mp3" preload="auto" />
-      <audio ref={wrongSoundRef} src="/sounds/wrong.mp3" preload="auto" />
-      <audio ref={finishSoundRef} src="/sounds/finish.mp3" preload="auto" />
+ return (
+  <div className={`min-h-screen flex flex-col items-center justify-start px-4 py-6 transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-green-200 to-blue-100 text-gray-800'}`}>
+    
+    {/* 🔈 เสียง */}
+    <audio ref={correctSoundRef} src="/sounds/correct.mp3" preload="auto" />
+    <audio ref={wrongSoundRef} src="/sounds/wrong.mp3" preload="auto" />
+    <audio ref={finishSoundRef} src="/sounds/finish.mp3" preload="auto" />
 
-      <div className="flex justify-between w-full max-w-md items-center mb-4">
-        <h1 className="text-3xl md:text-4xl font-bold drop-shadow text-green-800 dark:text-green-400">
-          เกมอบรม PPE โรงงาน
-        </h1>
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-full shadow bg-white dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-        >
-          {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-700" />}
-        </button>
-      </div>
-
-      <div className="text-xl font-semibold mb-2 text-green-700 dark:text-green-300">
-        คะแนนรวม: {score}
-      </div>
-      <div className="text-lg font-medium mb-4 text-green-600 dark:text-green-200">
-        คำถามที่ {questionIndex + 1} จาก {TOTAL_QUESTIONS}
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 w-full max-w-md transition-all">
-        {isFinished ? (
-          <>
-            <p className="text-xl font-semibold text-center mb-3">
-              จบเกม! คะแนนของคุณคือ {score} / {TOTAL_QUESTIONS}
-            </p>
-            <p className="text-center text-green-600 dark:text-green-300 mb-4">
-              คะแนนสูงสุด: {highScore}
-            </p>
-            {score >= 8 && (
-              <div className="text-center text-2xl font-bold text-green-500 mt-2 animate-bounce">
-                🎉 ยอดเยี่ยม! คุณผ่านการอบรม!
-              </div>
-            )}
-            <button
-              onClick={restart}
-              className="w-full mt-6 flex justify-center items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition shadow-md"
-            >
-              <RefreshCw className="w-5 h-5" /> เล่นอีกครั้ง
-            </button>
-          </>
-        ) : !currentQuestion ? (
-          // ⏳ Skeleton Loading
-          <div className="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-gray-800 animate-pulse">
-            <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
-            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2"></div>
-            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2"></div>
-            <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
-          </div>
-        ) : (
-          <>
-            {currentQuestion.image && (
-              <img src={currentQuestion.image} alt="PPE Question" className="mb-4 rounded-xl w-full h-auto object-contain border dark:border-gray-700" />
-            )}
-            <p className="text-lg font-bold mb-4">
-              [{currentQuestion.situation}] {currentQuestion.question}
-            </p>
-            {['A', 'B', 'C'].map((ch) => {
-              const txt = currentQuestion[`choice${ch}`];
-              const isCorrect = ch === currentQuestion.correctAnswer.toUpperCase();
-              return (
-                <button
-                  key={ch}
-                  onClick={() => handleChoice(ch)}
-                  disabled={!!selectedChoice}
-                  className={`w-full text-left px-4 py-3 rounded-xl mb-3 font-medium border transition shadow-md
-                    ${selectedChoice === ch
-                      ? isCorrect
-                        ? 'bg-green-500 text-white border-green-600'
-                        : 'bg-red-400 text-white border-red-500'
-                      : 'bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-700 text-gray-800 dark:text-white border-blue-300 dark:border-blue-700'}
-                  `}
-                >
-                  {ch}. {txt}
-                </button>
-              );
-            })}
-            {showExplanation && (
-              <div className="mt-4 text-sm border-t pt-3 animate-fade-in">
-                <strong className="flex items-center gap-2">
-                  {selectedChoice === currentQuestion.correctAnswer.toUpperCase()
-                    ? <><CheckCircle className="w-4 h-4 text-green-600" /> ถูกต้อง:</>
-                    : <><XCircle className="w-4 h-4 text-red-500" /> ผิด:</>
-                  }
-                </strong>{" "}
-                {currentQuestion.explanation}
-              </div>
-            )}
-            {selectedChoice && (
-              <button
-                onClick={nextQuestion}
-                className="w-full mt-6 flex justify-center items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-xl shadow-md transition"
-              >
-                <ArrowRightCircle className="w-5 h-5" /> คำถามถัดไป
-              </button>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* 💡 CSS แอนิเมชัน */}
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.4s ease-out;
-        }
-      `}</style>
+    {/* Header */}
+    <div className="flex justify-between w-full max-w-md items-center mb-4">
+      <h1 className="text-3xl md:text-4xl font-bold drop-shadow text-green-800 dark:text-green-400">
+        เกมอบรม PPE โรงงาน
+      </h1>
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className="p-2 rounded-full shadow bg-white dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+      >
+        {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-700" />}
+      </button>
     </div>
-  );
-}
+
+    {/* คะแนน */}
+    <div className="text-xl font-semibold mb-2 text-green-700 dark:text-green-300">
+      คะแนนรวม: {score}
+    </div>
+    <div className="text-lg font-medium mb-4 text-green-600 dark:text-green-200">
+      คำถามที่ {questionIndex + 1} จาก {TOTAL_QUESTIONS}
+    </div>
+
+    <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 w-full max-w-md transition-all">
+      {isFinished ? (
+        <>
+          <p className="text-xl font-semibold text-center mb-3">
+            จบเกม! คะแนนของคุณคือ {score} / {TOTAL_QUESTIONS}
+          </p>
+          <p className="text-center text-green-600 dark:text-green-300 mb-4">
+            คะแนนสูงสุด: {highScore}
+          </p>
+          {score >= 8 && (
+            <div className="text-center text-2xl font-bold text-green-500 mt-2 animate-bounce">
+              🎉 ยอดเยี่ยม! คุณผ่านการอบรม!
+            </div>
+          )}
+          <button
+            onClick={restart}
+            className="w-full mt-6 flex justify-center items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition shadow-md"
+          >
+            <RefreshCw className="w-5 h-5" /> เล่นอีกครั้ง
+          </button>
+        </>
+      ) : !currentQuestion ? (
+        // ⏳ Skeleton Loading
+        <div className="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-gray-800 animate-pulse">
+          <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2"></div>
+          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full mb-2"></div>
+          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+        </div>
+      ) : (
+        <>
+          {currentQuestion.image && (
+            <img src={currentQuestion.image} alt="PPE Question" className="mb-4 rounded-xl w-full h-auto object-contain border dark:border-gray-700" />
+          )}
+          <p className="text-lg font-bold mb-4">
+            [{currentQuestion.situation}] {currentQuestion.question}
+          </p>
+          {['A', 'B', 'C'].map((ch) => {
+            const txt = currentQuestion[`choice${ch}`];
+            const isCorrect = ch === currentQuestion.correctAnswer.toUpperCase();
+            return (
+              <button
+                key={ch}
+                onClick={() => handleChoice(ch)}
+                disabled={!!selectedChoice}
+                className={`w-full text-left px-4 py-3 rounded-xl mb-3 font-medium border transition shadow-md
+                  ${selectedChoice === ch
+                    ? isCorrect
+                      ? 'bg-green-500 text-white border-green-600'
+                      : 'bg-red-400 text-white border-red-500'
+                    : 'bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-700 text-gray-800 dark:text-white border-blue-300 dark:border-blue-700'}
+                `}
+              >
+                {ch}. {txt}
+              </button>
+            );
+          })}
+          {showExplanation && (
+            <div className="mt-4 text-sm border-t pt-3 animate-fade-in">
+              <strong className="flex items-center gap-2">
+                {selectedChoice === currentQuestion.correctAnswer.toUpperCase()
+                  ? <><CheckCircle className="w-4 h-4 text-green-600" /> ถูกต้อง:</>
+                  : <><XCircle className="w-4 h-4 text-red-500" /> ผิด:</>
+                }
+              </strong>{" "}
+              {currentQuestion.explanation}
+            </div>
+          )}
+          {selectedChoice && (
+            <button
+              onClick={nextQuestion}
+              className="w-full mt-6 flex justify-center items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 rounded-xl shadow-md transition"
+            >
+              <ArrowRightCircle className="w-5 h-5" /> คำถามถัดไป
+            </button>
+          )}
+        </>
+      )}
+    </div>
+
+    {/* 💡 CSS Animation */}
+    <style>{`
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.4s ease-out;
+      }
+    `}</style>
+  </div>
+);
