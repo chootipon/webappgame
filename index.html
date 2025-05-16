@@ -2,445 +2,142 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>เกมอบรม PPE โรงงาน</title>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet" />
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PPE Training Quiz</title>
   <style>
-    /* Reset and base */
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Kanit', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      margin: 0;
-      padding: 20px 15px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      user-select: none;
-      overflow-x: hidden;
-    }
-
-    h1 {
-      margin-bottom: 15px;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-      font-weight: 700;
-      font-size: 2rem;
-      text-align: center;
-      animation: fadeInDown 0.8s ease forwards;
-    }
-
-    #score, #progress {
-      font-weight: 600;
-      margin-bottom: 10px;
-      text-shadow: 0 0 5px rgba(0,0,0,0.3);
-      animation: fadeInUp 0.8s ease forwards;
-      text-align: center;
-    }
-
-    #score {
-      font-size: 1.4rem;
-    }
-
-    #progress {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-    }
-
-    #questionBox {
-      background: #3a2f63;
-      border-radius: 20px;
-      padding: 25px 30px;
-      max-width: 450px;
-      width: 100%;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-      animation: popIn 0.5s ease forwards;
-      position: relative;
-      overflow: hidden;
-      min-height: 230px;
-      transition: box-shadow 0.3s ease;
-    }
-
-    #questionBox.loading {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    @keyframes popIn {
-      0% {
-        transform: scale(0.9);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    @keyframes fadeInDown {
-      0% {
-        opacity: 0;
-        transform: translateY(-15px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .questionText {
-      font-weight: 700;
-      font-size: 1.3rem;
-      margin-bottom: 22px;
-      min-height: 70px;
-      text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
-      line-height: 1.3;
-      animation: fadeInText 0.5s ease forwards;
-    }
-
-    @keyframes fadeInText {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .choiceBtn {
-      position: relative;
-      overflow: hidden;
-      display: block;
-      width: 100%;
-      padding: 16px 0;
-      margin: 10px 0;
-      font-size: 1.15rem;
-      color: #fff;
-      background: #6c63ff;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(108, 99, 255, 0.55);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-      user-select: none;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      animation: fadeInUp 0.6s ease forwards;
-    }
-
-    .choiceBtn:hover:not(:disabled) {
-      background: #534eda;
-      box-shadow: 0 10px 26px rgba(83, 78, 218, 0.75);
-      transform: translateY(-3px);
-    }
-    .choiceBtn:disabled {
-      cursor: not-allowed;
-      background: #8a85ffaa;
-      box-shadow: none;
-      color: #ddd;
-      transform: none;
-    }
-
-    .choiceBtn::after {
-      content: "";
-      position: absolute;
-      border-radius: 50%;
-      width: 100px;
-      height: 100px;
-      background: rgba(255, 255, 255, 0.6);
-      top: 50%;
-      left: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%) scale(0);
-      opacity: 0;
-      transition: transform 0.6s ease, opacity 1s ease;
-    }
-
-    .choiceBtn.ripple::after {
-      transform: translate(-50%, -50%) scale(2.5);
-      opacity: 1;
-    }
-
-    .choiceBtn.correct {
-      background-color: #4caf50 !important;
-      box-shadow: 0 10px 28px rgba(76, 175, 80, 0.85) !important;
-      color: #fff !important;
-      transform: translateY(-3px);
-    }
-
-    #explanation {
-      margin-top: 18px;
-      font-size: 1.05rem;
-      color: #dcdcdc;
-      min-height: 54px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      user-select: text;
-      text-shadow: 0 0 6px rgba(0,0,0,0.3);
-      font-weight: 500;
-      line-height: 1.4;
-      animation: fadeInText 0.5s ease forwards;
-    }
-    #explanation.show {
-      opacity: 1;
-    }
-
-    #nextBtn {
-      margin-top: 28px;
-      padding: 16px 0;
-      width: 100%;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #3a2f63;
-      background: #ffdd57;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      box-shadow: 0 8px 22px rgba(255, 221, 87, 0.9);
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      user-select: none;
-      display: none;
-      animation: fadeInUp 0.6s ease forwards;
-    }
-
-    #nextBtn:hover {
-      background: #f6c90e;
-      transform: translateY(-3px);
-    }
-
-    /* Responsive for mobile */
-    @media (max-width: 480px) {
-      body {
-        padding: 15px 12px;
-      }
-      h1 {
-        font-size: 1.6rem;
-      }
-      #score {
-        font-size: 1.2rem;
-      }
-      #progress {
-        font-size: 1.1rem;
-      }
-      #questionBox {
-        padding: 22px 18px;
-        min-height: 210px;
-      }
-      .questionText {
-        font-size: 1.15rem;
-        min-height: 65px;
-      }
-      .choiceBtn {
-        font-size: 1rem;
-        padding: 14px 0;
-        border-radius: 12px;
-        margin: 8px 0;
-      }
-      #nextBtn {
-        font-size: 1rem;
-        padding: 14px 0;
-        border-radius: 14px;
-      }
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; text-align: center; }
+    button { padding: 10px 20px; font-size: 1rem; background: #3f51b5; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .option { background: #fff; border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 10px; cursor: pointer; }
+    .correct { background: #c8e6c9; }
+    .incorrect { background: #ffcdd2; }
   </style>
 </head>
 <body>
-  <h1>เกมอบรม PPE โรงงาน</h1>
-  <div id="score">คะแนนรวม: 0</div>
-  <div id="progress">คำถามที่ 1 จาก 10</div>
 
-  <div id="questionBox">
-    <div class="questionText">[รอโหลดคำถาม...]</div>
-    <button class="choiceBtn">A</button>
-    <button class="choiceBtn">B</button>
-    <button class="choiceBtn">C</button>
-    <div id="explanation"></div>
+  <h1>เกมฝึกอบรมความปลอดภัย (PPE)</h1>
+
+  <div id="startScreen">
+    <input type="text" id="employeeIdInput" placeholder="กรอกรหัสพนักงาน" />
+    <br><br>
+    <button onclick="startGame()">เริ่มเกม</button>
   </div>
 
-  <button id="nextBtn">คำถามถัดไป</button>
-  
-<script>
-  const TOTAL_QUESTIONS = 10;
-  let currentQuestion = null;
-  let score = 0;
-  let questionIndex = 0;
-  let askedQuestions = new Set();
-  let questions = [];
+  <div id="gameContainer" style="display:none;">
+    <h2 id="question"></h2>
+    <div id="options"></div>
+    <p>คะแนน: <span id="score">0</span></p>
+    <button onclick="loadQuestion()">คำถามถัดไป</button>
+  </div>
 
-  const questionText = document.querySelector('.questionText');
-  const [btnA, btnB, btnC] = document.querySelectorAll('.choiceBtn');
-  const explanation = document.getElementById('explanation');
-  const scoreDiv = document.getElementById('score');
-  const progressDiv = document.getElementById('progress');
-  const nextBtn = document.getElementById('nextBtn');
-  const questionBox = document.getElementById('questionBox');
+  <div id="finalScreen" style="display:none;">
+    <h2>จบเกม!</h2>
+    <p id="finalScore"></p>
+    <button onclick="location.reload()">เล่นอีกครั้ง</button>
+  </div>
 
-  function resetButtons() {
-    [btnA, btnB, btnC].forEach(btn => {
-      btn.disabled = false;
-      btn.classList.remove('correct');
-      btn.classList.remove('ripple');
-      btn.style.backgroundColor = '#6c63ff';
-      btn.style.boxShadow = '0 6px 12px rgba(108, 99, 255, 0.5)';
-      btn.style.color = '#fff';
-      btn.style.transform = 'none';
-    });
-  }
+  <div id="scoreboard">
+    <h2>Top 10 คะแนนสูงสุด</h2>
+    <ul id="topScores" style="list-style:none; padding:0;"></ul>
+  </div>
 
-  function highlightCorrectAnswer() {
-    const correct = currentQuestion.correctAnswer.toUpperCase();
-    if (correct === 'A') btnA.classList.add('correct');
-    else if (correct === 'B') btnB.classList.add('correct');
-    else if (correct === 'C') btnC.classList.add('correct');
-  }
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/PASTE_YOUR_SCRIPT_URL_HERE/exec";
 
-  function updateProgress() {
-    progressDiv.textContent = `คำถามที่ ${questionIndex} จาก ${TOTAL_QUESTIONS}`;
-  }
+    let questions = [];
+    let current = 0;
+    let score = 0;
+    let employeeId = "";
 
-  function checkAnswer(choice) {
-    [btnA, btnB, btnC].forEach(btn => btn.disabled = true);
-    [btnA, btnB, btnC].forEach(btn => btn.classList.remove('ripple'));
-
-    const clickedBtn = choice === 'A' ? btnA : choice === 'B' ? btnB : btnC;
-    clickedBtn.classList.add('ripple');
-    setTimeout(() => clickedBtn.classList.remove('ripple'), 600);
-
-    const isCorrect = choice === currentQuestion.correctAnswer.toUpperCase();
-    if (isCorrect) {
-      score++;
-      scoreDiv.textContent = `คะแนนรวม: ${score}`;
+    async function fetchQuestions() {
+      const res = await fetch(SCRIPT_URL);
+      const data = await res.json();
+      questions = data.sort(() => 0.5 - Math.random()); // shuffle
     }
 
-    explanation.textContent = (isCorrect ? 'ถูกต้อง! ' : 'ผิด! ') + currentQuestion.explanation;
-    explanation.classList.add('show');
-
-    highlightCorrectAnswer();
-    nextBtn.style.display = 'inline-block';
-  }
-
-  function showFinalScore() {
-    questionText.textContent = `จบเกม! คะแนนรวมของคุณคือ ${score} จาก ${TOTAL_QUESTIONS}`;
-    [btnA, btnB, btnC].forEach(btn => {
-      btn.style.display = 'none';
-    });
-    explanation.classList.remove('show');
-    explanation.textContent = '';
-
-    nextBtn.textContent = 'เล่นอีกครั้ง';
-    nextBtn.style.display = 'inline-block';
-
-    const highScore = localStorage.getItem('ppeHighScore') || 0;
-    if (score > highScore) {
-      localStorage.setItem('ppeHighScore', score);
-      explanation.textContent = '🎉 คะแนนสูงสุดใหม่! 🎉';
-    } else {
-      explanation.textContent = `คะแนนสูงสุด: ${highScore}`;
-    }
-    explanation.classList.add('show');
-
-    nextBtn.onclick = () => {
-      score = 0;
-      scoreDiv.textContent = `คะแนนรวม: ${score}`;
-      questionIndex = 0;
-      askedQuestions.clear();
-      [btnA, btnB, btnC].forEach(btn => {
-        btn.style.display = 'block';
-      });
-      nextBtn.textContent = 'คำถามถัดไป';
-      nextBtn.style.display = 'none';
-      explanation.classList.remove('show');
-      explanation.textContent = '';
-      nextBtn.onclick = () => loadQuestion();
+    function startGame() {
+      employeeId = document.getElementById("employeeIdInput").value.trim();
+      if (!employeeId) {
+        alert("กรุณากรอกรหัสพนักงาน");
+        return;
+      }
+      document.getElementById("startScreen").style.display = "none";
+      document.getElementById("gameContainer").style.display = "block";
       loadQuestion();
-    };
-  }
-
-  function loadQuestion() {
-    explanation.classList.remove('show');
-    explanation.textContent = '';
-    nextBtn.style.display = 'none';
-
-    questionBox.classList.add('loading');
-
-    if (questionIndex >= TOTAL_QUESTIONS) {
-      questionBox.classList.remove('loading');
-      showFinalScore();
-      return;
     }
 
-    questionText.textContent = 'กำลังโหลดคำถาม...';
-    resetButtons();
+    function loadQuestion() {
+      if (current >= questions.length) return endGame();
 
-    if (questions.length === 0) {
-      const url = 'https://script.google.com/macros/s/AKfycbzCpJJNVOdsRVUtHAZjRbC59gvavFDDf8mQod2U5Mn2K_512W_p7Zzndn1y8GqB2LU0/exec';
+      const q = questions[current];
+      document.getElementById("question").textContent = q.question;
+      const options = document.getElementById("options");
+      options.innerHTML = "";
 
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          questions = data;
-          pickQuestion();
-          questionBox.classList.remove('loading');
-        })
-        .catch(err => {
-          questionText.textContent = 'โหลดคำถามไม่สำเร็จ กรุณาลองใหม่';
-          questionBox.classList.remove('loading');
-          console.error(err);
+      q.options.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.textContent = opt;
+        div.onclick = () => handleAnswer(div, q.answer);
+        options.appendChild(div);
+      });
+    }
+
+    function handleAnswer(selected, correct) {
+      const all = document.querySelectorAll(".option");
+      all.forEach(opt => opt.onclick = null);
+
+      if (selected.textContent === correct) {
+        selected.classList.add("correct");
+        score++;
+      } else {
+        selected.classList.add("incorrect");
+        all.forEach(opt => {
+          if (opt.textContent === correct) opt.classList.add("correct");
         });
-    } else {
-      pickQuestion();
-      questionBox.classList.remove('loading');
+      }
+
+      document.getElementById("score").textContent = score;
+      current++;
     }
 
-    function pickQuestion() {
-      let question;
-      do {
-        const idx = Math.floor(Math.random() * questions.length);
-        question = questions[idx];
-      } while (askedQuestions.has(question.id));
+    function endGame() {
+      document.getElementById("gameContainer").style.display = "none";
+      document.getElementById("finalScreen").style.display = "block";
+      document.getElementById("finalScore").textContent = `คุณได้ ${score} คะแนน`;
 
-      askedQuestions.add(question.id);
-      currentQuestion = question;
-      questionIndex++;
-      updateProgress();
-
-      // Animate question text fade out/in
-      questionText.style.opacity = 0;
-      setTimeout(() => {
-        questionText.textContent = `[${question.situation}] ${question.question}`;
-        btnA.textContent = 'A. ' + question.choiceA;
-        btnB.textContent = 'B. ' + question.choiceB;
-        btnC.textContent = 'C. ' + question.choiceC;
-        questionText.style.opacity = 1;
-      }, 250);
+      saveScore();
     }
-  }
 
-  btnA.onclick = () => checkAnswer('A');
-  btnB.onclick = () => checkAnswer('B');
-  btnC.onclick = () => checkAnswer('C');
-  nextBtn.onclick = () => loadQuestion();
+    function saveScore() {
+      const data = {
+        employeeId,
+        score,
+        timestamp: new Date().toISOString()
+      };
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+      }).then(() => loadTopScores());
+    }
 
-  window.onload = loadQuestion;
-</script>
+    async function loadTopScores() {
+      const res = await fetch(SCRIPT_URL + "?mode=top10");
+      const data = await res.json();
+      const list = document.getElementById("topScores");
+      list.innerHTML = "";
+      data.forEach((item, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${i + 1}. ${item.employeeId} - ${item.score}`;
+        list.appendChild(li);
+      });
+    }
+
+    window.onload = async () => {
+      await fetchQuestions();
+      loadTopScores();
+    };
+  </script>
 
 </body>
 </html>
