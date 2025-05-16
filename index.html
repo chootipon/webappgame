@@ -2,142 +2,194 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PPE Training Quiz</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" />
+
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; text-align: center; }
-    button { padding: 10px 20px; font-size: 1rem; background: #3f51b5; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    .option { background: #fff; border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 10px; cursor: pointer; }
-    .correct { background: #c8e6c9; }
-    .incorrect { background: #ffcdd2; }
+    body {
+      background: linear-gradient(to right, #f9f9f9, #e0f7fa);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .option {
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .option:hover {
+      transform: scale(1.02);
+    }
+    .correct {
+      background-color: #c8e6c9 !important;
+    }
+    .incorrect {
+      background-color: #ffcdd2 !important;
+    }
+    .quiz-box {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 1rem;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
 
-  <h1>เกมฝึกอบรมความปลอดภัย (PPE)</h1>
+<div class="container py-5">
+  <div class="quiz-box text-center animate__animated animate__fadeIn">
 
-  <div id="startScreen">
-    <input type="text" id="employeeIdInput" placeholder="กรอกรหัสพนักงาน" />
-    <br><br>
-    <button onclick="startGame()">เริ่มเกม</button>
+    <h1 class="mb-4">🎯 เกมฝึกอบรมความปลอดภัย (PPE)</h1>
+
+    <div id="startScreen">
+      <div class="mb-3">
+        <input type="text" class="form-control" id="employeeIdInput" placeholder="กรอกรหัสพนักงาน" />
+      </div>
+      <button class="btn btn-primary w-100" onclick="startGame()">เริ่มเกม</button>
+    </div>
+
+    <div id="gameContainer" style="display:none;">
+      <h4 id="question" class="mb-4 animate__animated animate__fadeInDown"></h4>
+      <div id="options" class="mb-4"></div>
+      <p>คะแนน: <span id="score">0</span></p>
+      <button class="btn btn-secondary w-100" onclick="loadQuestion()">คำถามถัดไป</button>
+    </div>
+
+    <div id="finalScreen" style="display:none;">
+      <h2 class="text-success mb-3">🎉 จบเกม!</h2>
+      <p id="finalScore"></p>
+      <button class="btn btn-warning w-100" onclick="location.reload()">เล่นอีกครั้ง</button>
+    </div>
+
+    <div id="scoreboard" class="mt-5">
+      <h4>🏆 Top 10 คะแนนสูงสุด</h4>
+      <ul id="topScores" class="list-group mt-3"></ul>
+    </div>
+
   </div>
+</div>
 
-  <div id="gameContainer" style="display:none;">
-    <h2 id="question"></h2>
-    <div id="options"></div>
-    <p>คะแนน: <span id="score">0</span></p>
-    <button onclick="loadQuestion()">คำถามถัดไป</button>
-  </div>
+<!-- JavaScript -->
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfyc.../exec"; // ใส่ URL ของคุณ
 
-  <div id="finalScreen" style="display:none;">
-    <h2>จบเกม!</h2>
-    <p id="finalScore"></p>
-    <button onclick="location.reload()">เล่นอีกครั้ง</button>
-  </div>
+  let questions = [];
+  let current = 0;
+  let score = 0;
+  let employeeId = "";
 
-  <div id="scoreboard">
-    <h2>Top 10 คะแนนสูงสุด</h2>
-    <ul id="topScores" style="list-style:none; padding:0;"></ul>
-  </div>
-
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCpJJNVOdsRVUtHAZjRbC59gvavFDDf8mQod2U5Mn2K_512W_p7Zzndn1y8GqB2LU0/exec";
-
-    let questions = [];
-    let current = 0;
-    let score = 0;
-    let employeeId = "";
-
-    async function fetchQuestions() {
+  async function fetchQuestions() {
+    try {
       const res = await fetch(SCRIPT_URL);
       const data = await res.json();
       questions = data.sort(() => 0.5 - Math.random()); // shuffle
+    } catch (err) {
+      alert("เกิดข้อผิดพลาดในการโหลดคำถาม");
     }
+  }
 
-    function startGame() {
-      employeeId = document.getElementById("employeeIdInput").value.trim();
-      if (!employeeId) {
-        alert("กรุณากรอกรหัสพนักงาน");
-        return;
-      }
-      document.getElementById("startScreen").style.display = "none";
-      document.getElementById("gameContainer").style.display = "block";
-      loadQuestion();
+  function startGame() {
+    employeeId = document.getElementById("employeeIdInput").value.trim();
+    if (!employeeId) {
+      alert("กรุณากรอกรหัสพนักงาน");
+      return;
     }
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("gameContainer").style.display = "block";
+    loadQuestion();
+  }
 
-    function loadQuestion() {
-      if (current >= questions.length) return endGame();
+  function loadQuestion() {
+    if (current >= questions.length) return endGame();
 
-      const q = questions[current];
-      document.getElementById("question").textContent = q.question;
-      const options = document.getElementById("options");
-      options.innerHTML = "";
+    const q = questions[current];
+    document.getElementById("question").textContent = q.question;
+    const options = document.getElementById("options");
+    options.innerHTML = "";
 
-      q.options.forEach(opt => {
-        const div = document.createElement("div");
-        div.className = "option";
-        div.textContent = opt;
-        div.onclick = () => handleAnswer(div, q.answer);
-        options.appendChild(div);
+    q.options.forEach(opt => {
+      const btn = document.createElement("div");
+      btn.className = "option btn btn-outline-primary mb-2 w-100";
+      btn.textContent = opt;
+      btn.onclick = () => handleAnswer(btn, q.answer);
+      options.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(selected, correct) {
+    const all = document.querySelectorAll(".option");
+    all.forEach(opt => opt.onclick = null);
+
+    if (selected.textContent === correct) {
+      selected.classList.remove("btn-outline-primary");
+      selected.classList.add("correct");
+      score++;
+    } else {
+      selected.classList.remove("btn-outline-primary");
+      selected.classList.add("incorrect");
+      all.forEach(opt => {
+        if (opt.textContent === correct) {
+          opt.classList.add("correct");
+        }
       });
     }
 
-    function handleAnswer(selected, correct) {
-      const all = document.querySelectorAll(".option");
-      all.forEach(opt => opt.onclick = null);
+    document.getElementById("score").textContent = score;
+    current++;
+  }
 
-      if (selected.textContent === correct) {
-        selected.classList.add("correct");
-        score++;
-      } else {
-        selected.classList.add("incorrect");
-        all.forEach(opt => {
-          if (opt.textContent === correct) opt.classList.add("correct");
-        });
-      }
+  function endGame() {
+    document.getElementById("gameContainer").style.display = "none";
+    document.getElementById("finalScreen").style.display = "block";
+    document.getElementById("finalScore").textContent = `คุณได้ ${score} คะแนน`;
 
-      document.getElementById("score").textContent = score;
-      current++;
-    }
+    saveScore();
+  }
 
-    function endGame() {
-      document.getElementById("gameContainer").style.display = "none";
-      document.getElementById("finalScreen").style.display = "block";
-      document.getElementById("finalScore").textContent = `คุณได้ ${score} คะแนน`;
+  function saveScore() {
+    const data = {
+      employeeId,
+      score,
+      timestamp: new Date().toISOString()
+    };
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" }
+    }).then(() => loadTopScores());
+  }
 
-      saveScore();
-    }
-
-    function saveScore() {
-      const data = {
-        employeeId,
-        score,
-        timestamp: new Date().toISOString()
-      };
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-      }).then(() => loadTopScores());
-    }
-
-    async function loadTopScores() {
+  async function loadTopScores() {
+    try {
       const res = await fetch(SCRIPT_URL + "?mode=top10");
       const data = await res.json();
       const list = document.getElementById("topScores");
       list.innerHTML = "";
       data.forEach((item, i) => {
         const li = document.createElement("li");
-        li.textContent = `${i + 1}. ${item.employeeId} - ${item.score}`;
+        li.className = "list-group-item d-flex justify-content-between";
+        li.textContent = `${i + 1}. ${item.employeeId}`;
+        const badge = document.createElement("span");
+        badge.className = "badge bg-primary rounded-pill";
+        badge.textContent = item.score;
+        li.appendChild(badge);
         list.appendChild(li);
       });
+    } catch (err) {
+      console.error("โหลดคะแนนไม่สำเร็จ", err);
     }
+  }
 
-    window.onload = async () => {
-      await fetchQuestions();
-      loadTopScores();
-    };
-  </script>
+  window.onload = async () => {
+    await fetchQuestions();
+    loadTopScores();
+  };
+</script>
 
 </body>
 </html>
